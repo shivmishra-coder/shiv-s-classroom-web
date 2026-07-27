@@ -148,51 +148,56 @@ def default_micro_state():
 
 def init_state():
     ss = st.session_state
-    ss.initialized = True
-    ss.student_name = ""
-    ss.student_address = ""
-    ss.student_mobile = ""
-    ss.student_age = 0
-    ss.student_telegram = ""
-    ss.master_schedule_visible = False
-    ss.engine_started = False
-    ss.engine_locked_start_date = None
-    ss.engine_frozen_days = 0
-    ss.topic_actual_hours = {}
-    ss.exam = EXAMS[0]
-    ss.mode = "Foundation Scaling Mode (Recommended for Beginners)"
-    ss.active_day = 1
-    ss.streak = 0
-    ss.consecutive_leaves = 0
-    ss.warmup_pending = False
-    ss.leave_balance = INITIAL_LEAVE_BALANCE
-    ss.leave_log = []
-    ss.leave_audit = []
-    ss.leave_earn_streak_milestone = 0
-    ss.leave_earn_hours_milestone = 0
-    ss.total_focus_hours = 0.0
-    ss.today_logged_hours = 0.0
-    ss.syllabus_finished_manual = False
-    ss.topic_progress = {}
-    ss.exam_date = date.today() + timedelta(days=330)
-    ss.start_date = date.today()
-    ss.weekly_hours = {}
-    ss.topic_mastery_day = {}
-    ss.gold_medals = []
-    ss.evaluated_weeks = set()
-    ss.vocab_items = []
-    ss.vocab_next_id = 1
-    ss.grammar_state = {t: default_micro_state() for t in GRAMMAR_TOPICS}
-    ss.micro_topic_state = {}
-    ss.speed_test_log = []
-    ss.mock_logs = []
-    ss.mock_hub_logs = []
-    ss.bookmarks = []
-    ss.bookmark_next_id = 1
-    ss.rapid_mock_log = []
-    ss.selected_certificate_week = None
+    
+    # Ye condition lagana ZARURI hai taaki rerun hone par values WIPE-OUT / RESET na hon
+    if "initialized" not in ss:
+        ss.initialized = True
+        ss.student_name = ""
+        ss.student_address = ""
+        ss.student_mobile = ""
+        ss.student_age = 0
+        ss.student_telegram = ""
+        ss.master_schedule_visible = False
+        ss.engine_started = False
+        ss.engine_locked_start_date = None
+        ss.engine_frozen_days = 0
+        ss.topic_actual_hours = {}
+        ss.exam = EXAMS[0]
+        ss.mode = "Foundation Scaling Mode (Recommended for Beginners)"
+        ss.active_day = 1
+        ss.streak = 0
+        ss.consecutive_leaves = 0
+        ss.warmup_pending = False
+        ss.leave_balance = INITIAL_LEAVE_BALANCE
+        ss.leave_log = []
+        ss.leave_audit = []
+        ss.leave_earn_streak_milestone = 0
+        ss.leave_earn_hours_milestone = 0
+        ss.total_focus_hours = 0.0
+        ss.today_logged_hours = 0.0
+        ss.syllabus_finished_manual = False
+        ss.topic_progress = {}
+        ss.exam_date = date.today() + timedelta(days=330)
+        ss.start_date = date.today()
+        ss.weekly_hours = {}
+        ss.topic_mastery_day = {}
+        ss.gold_medals = []
+        ss.evaluated_weeks = set()
+        ss.vocab_items = []
+        ss.vocab_next_id = 1
+        ss.grammar_state = {t: default_micro_state() for t in GRAMMAR_TOPICS}
+        ss.micro_topic_state = {}
+        ss.speed_test_log = []
+        ss.mock_logs = []
+        ss.mock_hub_logs = []
+        ss.bookmarks = []
+        ss.bookmark_next_id = 1
+        ss.rapid_mock_log = []
+        ss.selected_certificate_week = None
 
-
+# Pure script me initialization bas yahan se trigger hogi:
+# Sirf EK BAAR call hoga jab session_state truly uninitialized ho — is se
+# rerun (button click, widget change, etc.) par values kabhi wipe-out nahi hongi.
 if "initialized" not in st.session_state:
     init_state()
 
@@ -1127,11 +1132,14 @@ with st.sidebar:
             'to unlock the Preparation Engine.</div>',
             unsafe_allow_html=True,
         )
-        if st.button("🚀 START MY PREPARATION ENGINE", type="primary", use_container_width=True,
-                      disabled=not can_start_engine()):
-            ss.engine_started = True
-            ss.engine_locked_start_date = ss.start_date
-            st.rerun()
+        if st.button("🚀 START MY PREPARATION ENGINE", type="primary", use_container_width=True):
+            if profile_complete():
+                ss.engine_started = True
+                ss.engine_locked_start_date = ss.start_date
+                st.success("🚀 Preparation Engine started! Your calendar is now locked in.")
+                st.rerun()
+            else:
+                st.warning("⚠️ Please fill in Name, Mobile & City above before starting the engine.")
         if not profile_complete():
             st.caption("Fill in Name, Mobile & City above to enable the button.")
 
